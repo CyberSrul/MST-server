@@ -1,7 +1,7 @@
 compiler = g++
 flags	 = -Wall -g3
-headers	 = graph.hpp
-objects	 = graph.o   tests.o
+headers	 = graph.hpp mst.hpp
+objects	 = graph.o	 mst.o   tests.o
 main 	 = tests
 
 
