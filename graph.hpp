@@ -9,14 +9,17 @@ class Graph
 {
 public:
 
-unsigned int vx_count();
-unsigned int edge_count();
+Graph(unsigned int size);
 
+unsigned int vx_count()   const;
+unsigned int edge_count() const;
+
+bool hasNode(int node) const;
 void addNode(int node);
 void removeNode(int node);
+bool connected(int src, int dst) const;
 void connect(int src, int dst, float weight);
 void disconnect(int src, int dst);
-bool connected(int src, int dst);
 
 unordered_set<int>::const_iterator begin() const;
 unordered_set<int>::const_iterator end()   const;
