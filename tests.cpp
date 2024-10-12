@@ -55,10 +55,12 @@ int main(void)
     check(0u, graph.edge_count());
 
     cout << "MST" << endl;
+    
     auto MSTtests = [&graph](string algo)
     {
         cout << algo << endl;
 
+        // correctness test
         graph = Graph(6);
         graph.connect(0, 1, 1);
         graph.connect(0, 3, 5);
@@ -87,11 +89,26 @@ int main(void)
         check(true, tree.connected(1, 2));
         check(true, tree.connected(2, 5));
         check(true, tree.connected(3, 4));
+
+
+        // run time test
+        int size = 1500;
+        float density = 0.5;
+        graph = RandomGraph(size, density);
+
+        // making sure the graph is connected
+        graph.addNode(size);
+        for (int node = 0; node < size; node++)
+            graph.connect(node, size, 1);
+
+        tree = MST(algo, graph);
+        check(graph.vx_count(), tree.vx_count());
+        check(graph.vx_count() - 1, tree.edge_count());
+        
     };
 
     MSTtests("kruskal");
     MSTtests("prim");
-
 
 
     return 0;

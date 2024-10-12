@@ -102,11 +102,12 @@ Graph::Graph(unsigned int size)
 }
 
 
-Graph RandomGraph(int n, float p, int s)
+Graph RandomGraph(int n, float p)
 {
     Graph graph(n);
 
-    mt19937 PRG(s);
+    random_device seeder;
+    mt19937 PRG(seeder());
     uniform_real_distribution distr(0., 1.);
 
     for (int src : graph)

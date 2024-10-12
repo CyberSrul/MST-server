@@ -34,4 +34,4 @@ unordered_map<int, unordered_map<int, float>> edges;
 };
 
 
-Graph RandomGraph(int n, float p, int s);
+Graph RandomGraph(int n, float p);
