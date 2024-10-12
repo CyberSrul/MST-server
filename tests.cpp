@@ -54,34 +54,43 @@ int main(void)
     check(6u, graph.vx_count());
     check(0u, graph.edge_count());
 
-    cout << "kruskal" << endl;
-    graph.connect(0, 1, 1);
-    graph.connect(0, 3, 5);
-    graph.connect(1, 2, 4);
-    graph.connect(1, 3, 2);
-    graph.connect(2, 3, 3);
-    graph.connect(2, 5, 6);
-    graph.connect(3, 4, 7);
-    graph.connect(4, 5, 8);
+    cout << "MST" << endl;
+    auto MSTtests = [&graph](string algo)
+    {
+        cout << algo << endl;
 
-    Graph tree = MST("kruskal", graph);
-    check(graph.vx_count(), tree.vx_count());
-    check(graph.vx_count() - 1, tree.edge_count());
-    check(true, tree.connected(0, 1));
-    check(true, tree.connected(1, 3));
-    check(true, tree.connected(2, 3));
-    check(true, tree.connected(2, 5));
-    check(true, tree.connected(3, 4));
+        graph = Graph(6);
+        graph.connect(0, 1, 1);
+        graph.connect(0, 3, 5);
+        graph.connect(1, 2, 4);
+        graph.connect(1, 3, 2);
+        graph.connect(2, 3, 3);
+        graph.connect(2, 5, 6);
+        graph.connect(3, 4, 7);
+        graph.connect(4, 5, 8);
 
-    graph.disconnect(2, 3);
-    tree = MST("kruskal", graph);
-    check(graph.vx_count(), tree.vx_count());
-    check(graph.vx_count() - 1, tree.edge_count());
-    check(true, tree.connected(0, 1));
-    check(true, tree.connected(1, 3));
-    check(true, tree.connected(1, 2));
-    check(true, tree.connected(2, 5));
-    check(true, tree.connected(3, 4));
+        Graph tree = MST(algo, graph);
+        check(graph.vx_count(), tree.vx_count());
+        check(graph.vx_count() - 1, tree.edge_count());
+        check(true, tree.connected(0, 1));
+        check(true, tree.connected(1, 3));
+        check(true, tree.connected(2, 3));
+        check(true, tree.connected(2, 5));
+        check(true, tree.connected(3, 4));
+
+        graph.disconnect(2, 3);
+        tree = MST(algo, graph);
+        check(graph.vx_count(), tree.vx_count());
+        check(graph.vx_count() - 1, tree.edge_count());
+        check(true, tree.connected(0, 1));
+        check(true, tree.connected(1, 3));
+        check(true, tree.connected(1, 2));
+        check(true, tree.connected(2, 5));
+        check(true, tree.connected(3, 4));
+    };
+
+    MSTtests("kruskal");
+    MSTtests("prim");
 
 
 

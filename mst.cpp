@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <functional>
 #include <set>
+#include <queue>
 
 
 
@@ -46,7 +47,31 @@ Graph kruskal(const Graph& graph)
 }
 
 
-Graph prim(const Graph& graph){return graph;};
+Graph prim(const Graph& graph)
+{
+    Graph tree = Graph(0);
+    int src = * graph.begin();
+    tree.addNode(src);
+
+    priority_queue<Edge> heap;
+
+    while (tree.edge_count() < graph.vx_count() - 1)
+    {
+        for (auto [dst, w] : graph.Neighbors_of(src))
+            if (! tree.hasNode(dst))
+                heap.push(Edge(src, dst, -w));
+
+        Edge e = heap.top();
+        while (tree.hasNode(e.dst)) { heap.pop(); e = heap.top(); }
+
+        tree.addNode(e.dst);
+        tree.connect(e.src, e.dst, -e.weight);
+
+        src = e.dst;
+    }
+
+    return tree;
+}
 
 
 unordered_map<string, function<Graph(const Graph&)>> algos =
@@ -61,5 +86,5 @@ Graph MST(const string& algo, const Graph& graph)
     if (algos.count(algo))
         return algos[algo](graph);
 
-   throw invalid_argument("supports kruskal and prim algorithms only");
+   throw invalid_argument("algo is not supported");
 }
