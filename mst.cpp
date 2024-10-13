@@ -23,6 +23,49 @@ public:
 };
 
 
+class UnionFind
+{
+public:
+
+    UnionFind(const Graph& graph)
+    {
+        for (int node : graph)
+        {
+            parents[node] = node;
+            ranks[node] = 0;
+        }
+    }
+
+
+    int find(int node)
+    {
+        if (node != parents[node])
+            // path compression
+            parents[node] = find(parents[node]);
+
+        return parents[node];
+    }
+
+
+    void merge(int v, int u)
+    {
+        int rootv = find(v), rootu = find(u);
+
+        if (rootu == rootv) return;
+
+        ranks[rootv] > ranks[rootu] ? parents[rootu] = rootv : parents[rootv] = rootu;
+       
+        if (ranks[rootv] == ranks[rootu]) ranks[rootu]++;
+    }
+
+
+private:
+
+    unordered_map<int, int> parents;
+    unordered_map<int, int> ranks;
+};
+
+
 Graph kruskal(const Graph& graph)
 {
     set<Edge> sorted_edges;
@@ -30,18 +73,22 @@ Graph kruskal(const Graph& graph)
         for (auto [dst, w] : graph.Neighbors_of(src))
             sorted_edges.insert(Edge(src, dst, w));
 
+    UnionFind trees = UnionFind(graph);
+
     Graph forest = Graph(0);
 
     for (Edge e : sorted_edges)
+    {
         // do not close a cycle
-        if (! forest.hasNode(e.src) || ! forest.hasNode(e.dst))
-        {
-            forest.addNode(e.src); forest.addNode(e.dst);
+        if (trees.find(e.src) == trees.find(e.dst)) continue;
 
-            forest.connect(e.src, e.dst, e.weight);
+        forest.addNode(e.src); forest.addNode(e.dst);
+        forest.connect(e.src, e.dst, e.weight);
+        trees.merge(e.src, e.dst);
 
-            if (forest.edge_count() >= graph.vx_count()) break;
-        }
+        // forest connected into a tree
+        if (forest.edge_count() >= graph.vx_count()) break;
+    }
 
     return forest;
 }
@@ -83,8 +130,7 @@ unordered_map<string, function<Graph(const Graph&)>> algos =
 
 Graph MST(const string& algo, const Graph& graph)
 {
-    if (algos.count(algo))
-        return algos[algo](graph);
+    if (algos.count(algo)) return algos[algo](graph);
 
    throw invalid_argument("algo is not supported");
 }
