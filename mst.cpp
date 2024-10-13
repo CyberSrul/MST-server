@@ -1,7 +1,6 @@
 #include "mst.hpp"
 #include <stdexcept>
 #include <functional>
-#include <set>
 #include <queue>
 
 
@@ -68,16 +67,18 @@ private:
 
 Graph kruskal(const Graph& graph)
 {
-    set<Edge> sorted_edges;
+    Graph forest = Graph(0);
+    UnionFind trees = UnionFind(graph);
+    vector<Edge> edges;
+
+    // initiating and sorting edges
+    edges.reserve(graph.edge_count());
     for (int src : graph)
         for (auto [dst, w] : graph.Neighbors_of(src))
-            sorted_edges.insert(Edge(src, dst, w));
+            if (dst > src) edges.emplace_back(src, dst, w);
+    sort(edges.begin(), edges.end());
 
-    UnionFind trees = UnionFind(graph);
-
-    Graph forest = Graph(0);
-
-    for (Edge e : sorted_edges)
+    for (Edge e : edges)
     {
         // do not close a cycle
         if (trees.find(e.src) == trees.find(e.dst)) continue;
