@@ -9,4 +9,4 @@ using namespace std;
 
 
 
-void handle_request(const string& msg);
+stringstream handle_request(const string& msg);

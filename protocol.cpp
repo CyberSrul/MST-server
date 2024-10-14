@@ -8,7 +8,7 @@
     Global variables for an MST server.
     A weighted graph, a MST and statistics:
     min, max & avg distances in the tree.
-    As well as total weight.
+    As well as total weight.s
 */
 Graph graph, tree;
 float longest, shortes, avg, total;
@@ -49,7 +49,7 @@ void EditGraph(int vxnum, int ednum, bool add, istringstream& input)
 }
 
 
-void handle_request(const string& msg)
+stringstream handle_request(const string& msg)
 {
     stringstream response;
     istringstream request(msg);
@@ -64,27 +64,27 @@ void handle_request(const string& msg)
         EditGraph(vxnum, ednum, true, request);
         response << "Graph built";
     }
-    if (cmd == "AddNode")
+    else if (cmd == "AddNode")
     {
         EditGraph(1, 0, true, request);
         response << "Node added";
     }
-    if (cmd == "RemoveNode")
+    else if (cmd == "RemoveNode")
     {
         EditGraph(1, 0, false, request);
         response << "Node removed";
     }
-    if (cmd == "Connect")
+    else if (cmd == "Connect")
     {
         EditGraph(0, 1, true, request);
         response << "Vertecies connected";
     }
-    if (cmd == "DisConnect")
+    else if (cmd == "DisConnect")
     {
         EditGraph(0, 1, false, request);
         response << "Vertecies disconnected";
     }
-    if (cmd == "MST")
+    else if (cmd == "MST")
     {
         if (! updated)
         {
@@ -101,6 +101,11 @@ void handle_request(const string& msg)
         response << "Max distance: " << longest << endl;
         response << "Avg distance: " << avg;
     }
+    else
+    {
+        response << "Command not recognized.";
+    }
 
     response << endl;
+    return response;
 }

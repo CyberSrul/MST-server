@@ -1,5 +1,7 @@
 /.vscode
 *.o
 tests
+client
+server
 *.txt
 *.out

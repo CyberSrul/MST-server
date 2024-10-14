@@ -9,12 +9,10 @@ void handle_client(tcp::socket socket)
 
     while (true)
     {
-        // Buffer for receiving data
-        string buffer(1024, 0);
+        string request(BUFSIZ, 0), response;
 
-        // Reciving message from client
         boost::system::error_code error;
-        size_t length = socket.read_some(boost::asio::buffer(buffer), error);
+        size_t length = socket.read_some(boost::asio::buffer(request), error);
 
         if (error == boost::asio::error::eof)
         {
@@ -24,12 +22,12 @@ void handle_client(tcp::socket socket)
 
         else if (error) throw runtime_error("Failed to receive message");
 
-        buffer.resize(length);
-        cout << "Message received: " << buffer << endl;
+        request.resize(length);
 
-        // Echo message back to client
-        boost::asio::write(socket, boost::asio::buffer(buffer));
-        cout << "Message echoed back to client." << endl;
+        try { response = handle_request(request).str(); }
+        catch(exception& e) { response = "Format Error \n";}
+
+        boost::asio::write(socket, boost::asio::buffer(response));
     }
 
     socket.close();
@@ -39,22 +37,20 @@ int main()
 {
     boost::asio::io_context io_context;
 
-    // Create acceptor to listen on port 12345
+    // Server class, IPv6
     tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v6(), atoi(PORT)));
 
     cout << "waiting for connections" << endl;
 
     while (true)
     {
-        // Create a socket for the next client connection
+        // Open sockets for clients
         tcp::socket socket(io_context);
-
-        // Block until we get a client connection
         acceptor.accept(socket);
 
         // Launch a new thread to handle the client
         try { thread(handle_client, move(socket)).detach(); }
-        catch (exception& e) { cerr << "Exception: " << e.what() << "\n"; }
+        catch (exception& e) { cerr << "Exception: " << e.what() << endl; }
     }
 
     return 0;

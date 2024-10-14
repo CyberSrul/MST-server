@@ -17,9 +17,9 @@ int main()
 
     while (true)
     {
-        // Prepare and send message
+        // send
         std::string message(BUFSIZ, 0);
-        std::cout << "enter a messege for the server" << std::endl;
+        std::cout << "Enter a request for the server:" << std::endl;
         getline(std::cin, message);
         boost::asio::write(socket, boost::asio::buffer(message));
 
