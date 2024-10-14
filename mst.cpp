@@ -67,7 +67,7 @@ private:
 
 Graph kruskal(const Graph& graph)
 {
-    Graph forest = Graph(0);
+    Graph forest;
     UnionFind trees = UnionFind(graph);
     vector<Edge> edges;
 
@@ -97,7 +97,7 @@ Graph kruskal(const Graph& graph)
 
 Graph prim(const Graph& graph)
 {
-    Graph tree = Graph(0);
+    Graph tree;
     int src = * graph.begin();
     tree.addNode(src);
 

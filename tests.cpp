@@ -104,7 +104,6 @@ int main(void)
         tree = MST(algo, graph);
         check(graph.vx_count(), tree.vx_count());
         check(graph.vx_count() - 1, tree.edge_count());
-        cout << tree.edge_count() << endl;
     };
 
     MSTtests("kruskal");

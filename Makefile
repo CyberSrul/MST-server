@@ -1,15 +1,19 @@
 compiler = g++
-flags	 = -Wall -g3
-headers	 = graph.hpp mst.hpp
-objects	 = graph.o	 mst.o   tests.o
+flags	 = -Wall
+headers	 = graph.hpp mst.hpp protocol.hpp
+progs 	 = tests client server
 main 	 = tests
 
 
 
 
-all: $(main)
 
-$(main): $(objects)
+all: $(progs)
+
+tests: tests.o graph.o mst.o
+	$(compiler) $(flags) $^ -o $@
+
+server: server.o graph.o mst.o protocol.o
 	$(compiler) $(flags) $^ -o $@
 
 %.o: %.cpp $(headers)
@@ -40,4 +44,4 @@ callGraph: $(main)
 
 
 clean:
-	rm -f *.o *.gcda *.gcno *.gcov *.txt *.out callgrind.out.* $(main)
+	rm -f *.o *.gcda *.gcno *.gcov *.txt *.out callgrind.out.* $(progs)

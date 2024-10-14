@@ -102,6 +102,12 @@ Graph::Graph(unsigned int size)
 }
 
 
+Graph::Graph()
+{
+    * this = Graph(0);
+}
+
+
 Graph RandomGraph(int n, float p)
 {
     Graph graph(n);

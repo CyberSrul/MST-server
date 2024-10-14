@@ -10,6 +10,7 @@ class Graph
 public:
 
 Graph(unsigned int size);
+Graph();
 
 unsigned int vx_count()   const;
 unsigned int edge_count() const;
