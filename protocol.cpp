@@ -8,7 +8,7 @@
     Global variables for an MST server.
     A weighted graph, a MST and statistics:
     min, max & avg distances in the tree.
-    As well as total weight.s
+    As well as total weight
 */
 Graph graph, tree;
 float longest = 0, shortes = 0, avg = 0, total = 0;
