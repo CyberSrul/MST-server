@@ -3,5 +3,5 @@
 tests
 client
 server
-*.txt
+dos
 *.out

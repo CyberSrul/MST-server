@@ -1,8 +1,9 @@
 compiler = g++
 flags	 = -Wall
 headers	 = graph.hpp mst.hpp protocol.hpp
-progs 	 = tests client server
+progs 	 = tests client server dos
 main 	 = tests
+mainout  = RunTimes.txt
 
 
 
@@ -31,7 +32,7 @@ coverage: $(main)
 profile: flags += -pg
 profile: $(main)
 	./$(main)
-	gprof -p $(main) gmon.out >> RunTimes.txt;
+	gprof -p $(main) gmon.out >> $(mainout);
 
 
 memcheck: $(main)
@@ -44,4 +45,4 @@ callGraph: $(main)
 
 
 clean:
-	rm -f *.o *.gcda *.gcno *.gcov *.txt *.out callgrind.out.* $(progs)
+	rm -f *.o *.gcda *.gcno *.gcov *.out callgrind.out.* $(progs) $(mainout)

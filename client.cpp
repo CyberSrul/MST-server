@@ -21,6 +21,7 @@ int main()
         std::string message(BUFSIZ, 0);
         std::cout << "Enter a request for the server:" << std::endl;
         getline(std::cin, message);
+        if (message == "END") break;
         boost::asio::write(socket, boost::asio::buffer(message));
 
         // recv
