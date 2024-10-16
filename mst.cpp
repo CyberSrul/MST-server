@@ -2,8 +2,12 @@
 #include <stdexcept>
 #include <functional>
 #include <queue>
+#include <limits>
 
 
+
+
+/* Data structures */
 
 
 class Edge
@@ -65,6 +69,9 @@ private:
 };
 
 
+/* Solvers */
+
+
 Graph kruskal(const Graph& graph)
 {
     Graph forest;
@@ -122,6 +129,9 @@ Graph prim(const Graph& graph)
 }
 
 
+/* Factory */
+
+
 unordered_map<string, function<Graph(const Graph&)>> algos =
 {
     {"kruskal", kruskal},
@@ -134,4 +144,133 @@ Graph MST(const string& algo, const Graph& graph)
     if (algos.count(algo)) return algos[algo](graph);
 
    throw invalid_argument("algo is not supported");
+}
+
+
+/* Statistics */
+
+
+float total_weight(const Graph& tree)
+{
+    float total = 0;
+
+    for (int src : tree)
+        for (auto [dst, w] : tree.Neighbors_of(src))
+            if (dst > src) total += w;
+
+    return total;
+}
+
+
+float min_edge(const Graph& tree)
+{
+    float lowest = numeric_limits<float>::max();
+
+    for (int src : tree)
+        for (auto [dst, w] : tree.Neighbors_of(src))
+            if (w < lowest) lowest = w;
+
+    return lowest;
+}
+
+
+unordered_map<int, float> distances(int src, const Graph& tree)
+{
+    unordered_map<int, float> dists;
+    function<void(int, int, float)> propegate;
+
+    propegate = [&dists, &tree, &propegate](int parent, int node, float dist)
+    {
+        dists[node] = dist;
+
+        for (auto [nei, w] : tree.Neighbors_of(node))
+            if (nei != parent) propegate(node, nei, dist + w);
+    };
+
+    propegate(src, src, 0);
+
+    return dists;
+}
+
+
+float max_distance(const Graph& tree)
+{
+    unordered_map<int, float> dists;
+    int max_node;
+    float max_dist;
+
+    auto find_max = [&max_node, &max_dist, &dists]()
+    {
+        max_node = 0; max_dist = 0;
+
+        for (auto [node, dist] : dists)
+            if (dist > max_dist)
+            {
+                max_node = node;
+                max_dist = dist;
+            }
+    };
+
+    dists = distances(* tree.begin(), tree);
+    find_max();
+    dists = distances(max_node, tree);
+    find_max();
+
+    return max_dist;
+}
+
+
+unordered_map<int, int> sub_trees_sizes(int src, const Graph& tree)
+{
+    unordered_map<int, int> sizes;
+    function<void(int, int)> propegate;
+
+    propegate = [&sizes, &tree, &propegate](int parent, int node)
+    {
+        sizes[node] = 1;
+
+        for (auto [nei, w] : tree.Neighbors_of(node))
+            if (nei != parent)
+            {
+                propegate(node, nei);
+                sizes[node] += sizes[nei];
+            }
+    };
+
+    propegate(src, src);
+
+    return sizes;
+}
+
+
+float avg_distance(const Graph& tree)
+{
+    int root = * tree.begin();
+
+    // node -> sum of distances from node to all others
+    auto distsums = distances(root, tree);
+    for (auto [node, dist] : distsums)
+        if (node != root) distsums[root] += dist;
+
+    // node -> size of sub-tree rooted in node
+    auto sizes = sub_trees_sizes(root, tree);
+
+    // filling the rest of distsums according to a formula
+    function<void(int, int, float)> propegate;
+    propegate = [&distsums, &sizes, &tree, &propegate](int parent, int node, float weight)
+    {
+        distsums[node] = distsums[parent] + weight * ((float) tree.vx_count() - 2 * sizes[node]);
+
+        for (auto [nei, w] : tree.Neighbors_of(node))
+            if (nei != parent) propegate(node, nei, w);
+    };
+
+    propegate(root, root, 0);
+
+    // avg distance = sum of distances of all paths / num of paths
+    int path_count = tree.vx_count() * tree.vx_count();
+    float sum = 0;
+    for (auto [node, dist] : distsums) sum += dist / path_count;
+
+    return sum;
 }

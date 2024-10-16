@@ -11,7 +11,7 @@
     As well as total weight.s
 */
 Graph graph, tree;
-float longest, shortes, avg, total;
+float longest = 0, shortes = 0, avg = 0, total = 0;
 bool updated = true;
 
 
@@ -39,9 +39,8 @@ void EditGraph(int vxnum, int ednum, bool add, istringstream& input)
         }
         else
         {
+            if (tree.connected(src, dst)) updated = false;
             graph.disconnect(src, dst);
-            if (tree.connected(src, dst))
-                updated = false;
         }
     }
 
@@ -58,10 +57,15 @@ stringstream handle_request(const string& msg)
 
     if (cmd == "NewGraph")
     {
+        updated = false;
+
         int vxnum, ednum;
         char delimeter;
         request >> vxnum >> delimeter >> ednum;
-        EditGraph(vxnum, ednum, true, request);
+
+        graph = Graph(vxnum);
+        EditGraph(0, ednum, true, request);
+
         response << "Graph built";
     }
     else if (cmd == "AddNode")
@@ -92,6 +96,11 @@ stringstream handle_request(const string& msg)
 
             try { tree = MST(cmd, graph); }
             catch(const std::exception& e) { response << e.what(); }
+
+            longest = max_distance(tree);
+            shortes = min_edge(tree);
+            avg     = avg_distance(tree);
+            total   = total_weight(tree);
 
             updated = true;
         }
