@@ -1,7 +1,11 @@
 /.vscode
-*.o
 tests
 client
 server
 dos
+*.o
+*.gcda
+*.gcno
+*.gcov
 *.out
+callgrind.out.*

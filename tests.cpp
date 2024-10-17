@@ -24,13 +24,14 @@ int main(void)
     cout << "Graph" << endl;
 
     cout << "start" << endl;
-    Graph graph(0);
+    Graph graph;
     check(0u, graph.vx_count());
     check(0u, graph.edge_count());
 
     cout << "addNode" << endl;
     for (int node = 0; node < 5; graph.addNode(node++));
     check(5u, graph.vx_count());
+    for (int node = 0; node < 5; check(true, graph.hasNode(node++)));
 
     cout << "connected" << endl;
     check(false, graph.connected(0, 4));
@@ -49,13 +50,30 @@ int main(void)
     for (int node : graph)
         check(4lu, graph.Neighbors_of(node).size());
 
+    try{ graph.connect(0, 10, 0); }
+    catch(const exception& e){ check("src or dst were not found", e.what()); }
+
+    try{ graph.connect(0, 0, 0); }
+    catch(const exception& e){ check("a node can not point to itsle", e.what()); }
+
     cout << "removeNode" << endl;
     graph.removeNode(2);
     check(4u, graph.vx_count());
     check(6u, graph.edge_count());
+    check(false, graph.hasNode(2));
 
+    cout << "Neighbors_of" << endl;
     for (int node : graph)
         check(3lu, graph.Neighbors_of(node).size());
+
+    try{ graph.Neighbors_of(10); }
+    catch(const exception& e){ check("node was not found", e.what()); }
+
+    cout << "disconnect" << endl;
+    graph.disconnect(1, 3);
+    check(false, graph.connected(1, 3));
+    check(4u, graph.vx_count());
+    check(5u, graph.edge_count());
 
     cout << "clear" << endl;
     graph = Graph(6);
@@ -149,8 +167,15 @@ int main(void)
     MSTtests("kruskal");
     MSTtests("prim");
 
-    cout << "statistics" << endl;
+    try{ MSTtests("not supported"); }
+    catch(const exception& e){ check("algo is not supported", e.what()); }
 
+
+
+
+
+    cout << "statistics" << endl;
+    
     Graph tree;
 
     tree = MST("kruskal", graph1);
