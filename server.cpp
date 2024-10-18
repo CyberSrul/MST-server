@@ -21,7 +21,6 @@ mutex graph_mutex;
 
 /* Active objects */
 
-
 class MSTFactory
 {
 public:
@@ -190,19 +189,23 @@ int main()
     // TCP listener
     tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v6(), atoi(PORT)));
 
-    cout << "Waiting for connections..." << endl;
-
-    while (true)
+    function<void()> handle_connection;
+    handle_connection = [&handle_connection, &io_context, &acceptor, &thread_pool]()
     {
+        cout << "Waiting for connections..." << endl;
+
         // Astablish connection with a new client with its own socket
         tcp::socket socket(io_context);
         acceptor.accept(socket);
 
-        boost::asio::post(thread_pool, [socket = move(socket)]() mutable
-        {
-            handle_client(move(socket));
-        });
-    }
+        // new leader thread (leader-follower pattern)
+        boost::asio::post(thread_pool, handle_connection);
+
+        handle_client(move(socket));
+    };
+
+    handle_connection();
+    thread_pool.join();
 
     return 0;
 }
