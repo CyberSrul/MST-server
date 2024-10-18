@@ -1,20 +1,18 @@
-compiler = g++
-flags	 = -Wall
-headers	 = graph.hpp mst.hpp protocol.hpp
-progs 	 = tests client server dos
-main 	 = tests
-mainout  = RunTimes.txt
+compiler 	 = g++
+flags	 	 = -Wall
+headers	 	 = graph.hpp mst.hpp protocol.hpp
+dependent 	 = tests server
+independent  = client dos
+main 	 	 = tests
+mainout  	 = RunTimes.txt
 
 
 
 
 
-all: $(progs)
+all: $(dependent) $(independent)
 
-tests: tests.o graph.o mst.o
-	$(compiler) $(flags) $^ -o $@
-
-server: server.o graph.o mst.o protocol.o
+$(dependent): %: %.o graph.o mst.o
 	$(compiler) $(flags) $^ -o $@
 
 %.o: %.cpp $(headers)
@@ -45,4 +43,4 @@ callGraph: $(main)
 
 
 clean:
-	rm -f *.o *.gcda *.gcno *.gcov *.out callgrind.out.* $(progs) $(mainout)
+	rm -f *.o *.gcda *.gcno *.gcov *.out callgrind.out.* $(dependent) $(independent) $(mainout)

@@ -5,8 +5,3 @@
 #define PORT "5000"
 using boost::asio::ip::tcp;
 using namespace std;
-
-
-
-
-stringstream handle_request(const string& msg);
