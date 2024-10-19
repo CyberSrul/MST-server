@@ -1,9 +1,9 @@
 #include <boost/asio.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <thread>
+#include <mutex>
 #include <iostream>
 #include <sstream>
-#include <mutex>
 #include "protocol.hpp"
 #include "mst.hpp"
 #define WORKERS 20
@@ -19,58 +19,10 @@ mutex graph_mutex;
 
 
 
-/* Active objects */
-
-class MSTFactory
-{
-public:
-
-    Graph BuildTree(const string& algo)
-    {
-        lock_guard<mutex> lock(graph_mutex);
-
-        return MST(algo, graph);
-    }
-};
-
-
-class TreeAnalyser
-{
-public:
-
-    string GetStats(const Graph& tree)
-    {
-        ostringstream response;
-        response << "Total weight: " << total_weight(tree) << endl
-                 << "Min distance: " << min_edge(tree)     << endl
-                 << "Max distance: " << max_distance(tree) << endl
-                 << "Avg distance: " << avg_distance(tree);
-        return response.str();
-    }
-};
-
-
-
-
 /* The Pipe-Line */
-
-string MSTPipeLine(const string& algo)
-{
-    static MSTFactory mstf;
-    static TreeAnalyser analyser;
-
-    return analyser.GetStats(mstf.BuildTree(algo));
-}
-
-
-
-
-/* Networking */
 
 void EditGraph(int vxnum, int ednum, bool add, istringstream& input)
 {
-    lock_guard<mutex> lock(graph_mutex);
-
     int src, dst;
     char delimiter;
     float weight;
@@ -98,11 +50,36 @@ void EditGraph(int vxnum, int ednum, bool add, istringstream& input)
 }
 
 
-stringstream handle_request(const string& msg)
+string MSTStats(const string& algo)
 {
+    Graph tree = MST(algo, graph);
+
+    graph_mutex.unlock();
+
+    ostringstream response;
+    response << "Total weight: " << total_weight(tree) << endl
+             << "Min distance: " << min_edge(tree)     << endl
+             << "Max distance: " << max_distance(tree) << endl
+             << "Avg distance: " << avg_distance(tree) << endl;
+    return response.str();
+}
+
+
+stringstream request_pipe_line(const string& msg)
+{
+    graph_mutex.lock();
+
     stringstream response;
     istringstream request(msg);
     string cmd; request >> cmd;
+
+    auto proccess_mst_cmd = [&request, &cmd, &response]()
+    {
+        request >> cmd;
+
+        try{ response << MSTStats(cmd); }
+        catch (const exception& e) { response << e.what(); }
+    };
 
     if (cmd == "NewGraph")
     {
@@ -135,10 +112,8 @@ stringstream handle_request(const string& msg)
     }
     else if (cmd == "MST")
     {
-        request >> cmd;
-
-        try{ response << MSTPipeLine(cmd); }
-        catch (const exception& e) { response << e.what(); }
+        proccess_mst_cmd();
+        return response;
     }
     else
     {
@@ -146,9 +121,23 @@ stringstream handle_request(const string& msg)
     }
 
     response << endl;
+
+    // Possibility for the client to compute MST immediately
+    // on its latest graph version with no interaptions
+    if (request >> cmd && cmd == "MST")
+    {
+        proccess_mst_cmd();
+        return response;
+    }
+
+    graph_mutex.unlock();
     return response;
 }
 
+
+
+
+/* Networking */
 
 void handle_client(tcp::socket socket)
 {
@@ -170,7 +159,7 @@ void handle_client(tcp::socket socket)
 
         request.resize(length);
 
-        try { response = handle_request(request).str(); }
+        try { response = request_pipe_line(request).str(); }
         catch (exception& e) { response = "Format Error \n"; }
 
         boost::asio::write(socket, boost::asio::buffer(response));
