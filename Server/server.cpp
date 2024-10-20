@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include "protocol.hpp"
-#include "mst.hpp"
+#include "../MST/mst.hpp"
 #define WORKERS 20
 
 
