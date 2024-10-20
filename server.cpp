@@ -86,8 +86,19 @@ stringstream request_pipe_line(const string& msg)
         int vxnum, ednum;
         char delimiter;
         request >> vxnum >> delimiter >> ednum;
+
         graph = Graph(vxnum);
         EditGraph(0, ednum, true, request);
+        response << "Graph built";
+    }
+    if (cmd == "RandomGraph")
+    {
+        int size;
+        float density;
+        char delimiter;
+        request >> size >> delimiter >> density;
+        
+        graph = RandomGraph(size, density);
         response << "Graph built";
     }
     else if (cmd == "AddNode")

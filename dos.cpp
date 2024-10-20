@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    for (int ind = 0; ind < 5; ind++) fork();
+    for (int ind = 0; ind < 6; ind++) fork();
 
     system("./client < cmds.txt");
 

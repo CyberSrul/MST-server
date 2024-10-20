@@ -1,21 +1,49 @@
 #include "graph.hpp"
 #include "mst.hpp"
 #include <iostream>
+#include <functional>
 
 
+
+
+static unsigned int Fails = 0, Passes = 0;
 
 
 template <typename type>
 void check(type expected, type actuall)
 {
     const string status = expected == actuall ? "pass" : "fail";
+
+    status == "fail" ? Fails++ : Passes++;
+
     cout << status << endl;
+
+    if (status == "fail") cout << "expected: " << expected << endl << "got: " << actuall << endl;
 }
 
 void check_close(float expected, float actuall)
 {
     const string status = abs(expected - actuall) < 1e-2 ? "pass" : "fail";
+
+    status == "fail" ? Fails++ : Passes++;
+
     cout << status << endl;
+}
+
+
+void check_throws(string expected, function<void()> trigger)
+{
+    try{ trigger(); }
+    catch(const exception& e){ check(expected, string(e.what())); }
+}
+
+
+void Summary()
+{
+    cout << endl  << "********************" << endl;
+    cout << Passes << " tests were passed"  << endl;
+    cout << Fails  << " tests failed"       << endl;
+    cout          << "********************" << endl;
 }
 
 
@@ -50,11 +78,8 @@ int main(void)
     for (int node : graph)
         check(4lu, graph.Neighbors_of(node).size());
 
-    try{ graph.connect(0, 10, 0); }
-    catch(const exception& e){ check("src or dst were not found", e.what()); }
-
-    try{ graph.connect(0, 0, 0); }
-    catch(const exception& e){ check("a node can not point to itsle", e.what()); }
+    check_throws("src or dst were not found",       [&graph](){ graph.connect(0, 10, 0); });
+    check_throws("a node can not point to itslef",  [&graph](){ graph.connect(0, 0, 0);  });
 
     cout << "removeNode" << endl;
     graph.removeNode(2);
@@ -66,8 +91,7 @@ int main(void)
     for (int node : graph)
         check(3lu, graph.Neighbors_of(node).size());
 
-    try{ graph.Neighbors_of(10); }
-    catch(const exception& e){ check("node was not found", e.what()); }
+    check_throws("node was not found", [&graph](){ graph.Neighbors_of(10); });
 
     cout << "disconnect" << endl;
     graph.disconnect(1, 3);
@@ -167,8 +191,7 @@ int main(void)
     MSTtests("kruskal");
     MSTtests("prim");
 
-    try{ MSTtests("not supported"); }
-    catch(const exception& e){ check("algo is not supported", e.what()); }
+    check_throws("algo is not supported", [&MSTtests](){ MSTtests("not supported"); });
 
 
 
@@ -198,5 +221,6 @@ int main(void)
 
 
 
+    Summary();
     return 0;
 }
