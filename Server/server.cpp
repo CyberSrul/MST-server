@@ -121,7 +121,7 @@ stringstream request_pipe_line(const string& msg)
     {
         if (! (request >> cmd)) throw invalid_argument("partial input");
 
-        response << MSTStats(cmd);
+        response << endl << MSTStats(cmd);
         return response;
     }
     else
@@ -134,7 +134,7 @@ stringstream request_pipe_line(const string& msg)
     {
         if (! (request >> cmd)) throw invalid_argument("partial input");
 
-        response << MSTStats(cmd);
+        response << endl << MSTStats(cmd);
         return response;
     }
 

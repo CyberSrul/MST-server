@@ -141,9 +141,11 @@ unordered_map<string, function<Graph(const Graph&)>> algos =
 
 Graph MST(const string& algo, const Graph& graph)
 {
-    if (algos.count(algo)) return algos[algo](graph);
+    if (! algos.count(algo)) throw invalid_argument("algo is not supported");
 
-   throw invalid_argument("algo is not supported");
+    if (! graph.connected()) throw invalid_argument("the graph is disconnected");
+
+    return algos[algo](graph);
 }
 
 

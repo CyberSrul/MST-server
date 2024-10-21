@@ -1,3 +1,3 @@
-RandomGraph 100,1 MST prim
-RandomGraph 100,1 MST kruskal
+RandomGraph 100,0.5 MST prim
+RandomGraph 100,0.5 MST kruskal
 END

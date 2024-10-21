@@ -38,6 +38,26 @@ bool Graph::connected(int src, int dst) const
 }
 
 
+bool Graph::connected() const
+{
+    unordered_set<int> visited = {* begin()}, exusted;
+    
+    while (! visited.empty())
+    {
+        int src = * visited.begin();
+
+        for (auto [dst, w] : Neighbors_of(src))
+            if (! visited.count(dst) && ! exusted.count(dst))
+                visited.insert(dst);
+
+        visited.erase(src);
+        exusted.insert(src);
+    }
+
+    return exusted.size() == vx_count();
+}
+
+
 /* Setters */
 
 

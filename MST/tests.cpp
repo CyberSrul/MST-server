@@ -67,7 +67,7 @@ int main(void)
     check(true, graph.connected(0, 4));
     check(1u, graph.edge_count());
 
-    cout << "connect" << endl;
+    cout << "connect (vxs)" << endl;
     for (int src : graph)
         for (int dst : graph)
             if (src != dst)
@@ -100,11 +100,27 @@ int main(void)
     check(5u, graph.edge_count());
 
     cout << "clear" << endl;
-    graph = Graph(6);
-    check(6u, graph.vx_count());
+    graph = Graph(7);
+    check(7u, graph.vx_count());
     check(0u, graph.edge_count());
 
-
+    cout << "connected (graph)" << endl;
+    check(false, graph.connected());
+    graph.connect(0, 1, 0);
+    graph.connect(1, 2, 0);
+    graph.connect(3, 6, 0);
+    check(false, graph.connected());
+    graph.connect(5, 3, 0);
+    graph.connect(5, 4, 0);
+    check(false, graph.connected());
+    graph.connect(5, 6, 0);
+    check(false, graph.connected());
+    graph.connect(0, 6, 0);
+    check(true, graph.connected());
+    graph.disconnect(1, 2);
+    check(false, graph.connected());
+    graph.connect(3, 2, 0);
+    check(true, graph.connected());
 
 
 
@@ -192,6 +208,7 @@ int main(void)
     MSTtests("prim");
 
     check_throws("algo is not supported", [&MSTtests](){ MSTtests("not supported"); });
+    check_throws("the graph is disconnected", [](){ MST("prim", Graph(10)); });
 
 
 

@@ -21,6 +21,7 @@ void removeNode(int node);
 bool connected(int src, int dst) const;
 void connect(int src, int dst, float weight);
 void disconnect(int src, int dst);
+bool connected() const;
 
 unordered_set<int>::const_iterator begin() const;
 unordered_set<int>::const_iterator end()   const;
