@@ -1,5 +1,5 @@
 compiler 	 = g++
-flags	 	 = -Wall
+flags	 	 = -Wall -O3
 headers	 	 = MST/graph.hpp MST/mst.hpp Server/protocol.hpp
 objects		 = MST/graph.o	 MST/mst.o
 dependent 	 = MST/tests Server/server

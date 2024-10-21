@@ -43,11 +43,12 @@ make
 ```
 ### run
 ```bash
-./Server/server
+cd Server/
+./server
 ```
 ### test
 ```bash
-cd /test
+cd test/
 ./dos
 ```
 
