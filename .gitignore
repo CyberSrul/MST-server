@@ -9,3 +9,4 @@ dos
 *.gcov
 *.out
 callgrind.out.*
+RunTimes.txt
