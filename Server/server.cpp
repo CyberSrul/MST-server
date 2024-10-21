@@ -11,11 +11,10 @@
 
 
 
-/* Globals */
+/* Common Graph */
 
 Graph graph;
 mutex graph_mutex;
-
 
 
 
@@ -28,18 +27,23 @@ void EditGraph(int vxnum, int ednum, bool add, istringstream& input)
     float weight;
 
     // vertices
-    for (int itr = 0; itr < vxnum; itr++) {
-        input >> src;
+    for (int itr = 0; itr < vxnum; itr++)
+    {
+        if (! input >> src) throw invalid_argument("partial input");;
         add ? graph.addNode(src) : graph.removeNode(src);
     }
 
     // edges
-    for (int itr = 0; itr < ednum; itr++) {
-        input >> src >> delimiter >> dst;
+    for (int itr = 0; itr < ednum; itr++)
+    {
+        if (! (input >> src >> delimiter >> dst))
+            throw invalid_argument("partial input");
 
         if (add)
         {
-            input >> delimiter >> weight;
+            if (! (input >> delimiter >> weight))
+                throw invalid_argument("partial input");
+
             graph.connect(src, dst, weight);
         }
         else
@@ -73,30 +77,22 @@ stringstream request_pipe_line(const string& msg)
     istringstream request(msg);
     string cmd; request >> cmd;
 
-    auto proccess_mst_cmd = [&request, &cmd, &response]()
-    {
-        request >> cmd;
-
-        try{ response << MSTStats(cmd); }
-        catch (const exception& e) { response << e.what(); }
-    };
 
     if (cmd == "NewGraph")
     {
-        int vxnum, ednum;
-        char delimiter;
-        request >> vxnum >> delimiter >> ednum;
+        int vxnum, ednum; char delimiter;
+        if (! (request >> vxnum >> delimiter >> ednum))
+            throw invalid_argument("partial input");
 
         graph = Graph(vxnum);
         EditGraph(0, ednum, true, request);
         response << "Graph built";
     }
-    if (cmd == "RandomGraph")
+    else if (cmd == "RandomGraph")
     {
-        int size;
-        float density;
-        char delimiter;
-        request >> size >> delimiter >> density;
+        int size; float density; char delimiter;
+        if (! (request >> size >> delimiter >> density))
+            throw invalid_argument("partial input");
         
         graph = RandomGraph(size, density);
         response << "Graph built";
@@ -123,25 +119,28 @@ stringstream request_pipe_line(const string& msg)
     }
     else if (cmd == "MST")
     {
-        proccess_mst_cmd();
+        if (! (request >> cmd)) throw invalid_argument("partial input");
+
+        response << MSTStats(cmd);
         return response;
     }
     else
     {
         response << "Command not recognized";
     }
-
-    response << endl;
-
     // Possibility for the client to compute MST immediately
     // on its latest graph version with no interaptions
     if (request >> cmd && cmd == "MST")
     {
-        proccess_mst_cmd();
+        if (! (request >> cmd)) throw invalid_argument("partial input");
+
+        response << MSTStats(cmd);
         return response;
     }
 
+
     graph_mutex.unlock();
+    response << endl;
     return response;
 }
 
@@ -156,7 +155,7 @@ void handle_client(tcp::socket socket)
 
     while (true)
     {
-        string request(BUFSIZ, 0), response;
+        string request(BUFSIZ, 0), response(BUFSIZ, 0);
 
         boost::system::error_code error;
         size_t length = socket.read_some(boost::asio::buffer(request), error);
@@ -170,8 +169,12 @@ void handle_client(tcp::socket socket)
 
         request.resize(length);
 
-        try { response = request_pipe_line(request).str(); }
-        catch (exception& e) { response = "Format Error \n"; }
+        try{ response = request_pipe_line(request).str(); }
+        catch (exception& e)
+        {
+            graph_mutex.unlock();
+            response = e.what();
+        }
 
         boost::asio::write(socket, boost::asio::buffer(response));
     }
