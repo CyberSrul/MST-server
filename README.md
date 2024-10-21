@@ -43,11 +43,18 @@ make
 ```
 ### run
 ```bash
-./Server/server
+cd Server/
+./server
 ```
 ### test
+#### with a responsive client
 ```bash
-cd /test
+cd Server/
+./client
+```
+#### with a ready test file
+```bash
+cd Server/test/
 ./dos
 ```
 
